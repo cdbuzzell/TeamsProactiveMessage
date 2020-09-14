@@ -6,12 +6,12 @@ I built this project because I couldn't find a simple example of how to [send pr
 
 ### Register your bot and upload to Teams
 
-1. Register with the Bot Framework by following [this how-to guide](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#register-your-web-service-with-the-bot-framework)
+1. [Register with the Bot Framework](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#register-your-web-service-with-the-bot-framework)
 	- We don't need to get callbacks from Teams at this point, so we don't need a web service for our Bot at this point. Just put whatever in the URL.
-2. Copy the Microsoft App ID and password you get from this process, paste it into Notepad or soemthing for later
-3. Create your app manifest and package by following [this how-to guide](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#create-your-app-manifest-and-package)
+	- Copy the `Microsoft App ID` and `password` you get from this process, paste it into Notepad or soemthing for later
+3. [Create your app manifest and package](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#create-your-app-manifest-and-package)
 	- Make sure you enable the `Team` scope
-4. Upload your package to Microsoft Teams to install tyour Bot in the Team where you want to post channel messages by follow [this how-to guide](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#upload-your-package-to-microsoft-teams)
+4. [Upload your package to Microsoft Teams](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/create-a-bot-for-teams#upload-your-package-to-microsoft-teams) to install your Bot in the Team where you want to post channel messages
 
 *When you do this for reals, you may want to check this out if you have to send to many channels or users: [Enable proactive bot installation and proactive messaging in Teams with Microsoft Graph (Public Preview)](https://docs.microsoft.com/en-us/microsoftteams/platform/graph-api/proactive-bots-and-messages/graph-proactive-bots-and-messages?tabs=csharp)*
 
