@@ -1,0 +1,115 @@
+{
+	"info": {
+		"_postman_id": "e0274c9b-a300-48a1-985c-9f372d13a103",
+		"name": "Teams Proactive Message",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Post a new message to a channel",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"id": "14fc0f37-082c-4774-a6ee-9f466efc77cc",
+						"exec": [
+							"// set token variable used by other requests\r",
+							"var jsonData = pm.response.json();\r",
+							"var messageId = jsonData.id;\r",
+							"pm.collectionVariables.set(\"MessageId\", messageId)"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\"OPEN INC0001 Big problem with a critical system\""
+				},
+				"url": {
+					"raw": "http://localhost:54352/api/notifychannel",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "54352",
+					"path": [
+						"api",
+						"notifychannel"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Update an existing message in a channel",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"type": "text",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "\"RESOLVED INC0001 Big problem with a critical system\""
+				},
+				"url": {
+					"raw": "http://localhost:54352/api/notifychannel/{{MessageId}}",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "54352",
+					"path": [
+						"api",
+						"notifychannel",
+						"{{MessageId}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "d9ab235b-1318-4bd6-b551-877e7529c0b0",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "9cde4af2-96c4-4838-a0d6-8f1cbdcd53cb",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "0c408fc9-aa16-4902-a13d-51477f1e809c",
+			"key": "MessageId",
+			"value": ""
+		}
+	],
+	"protocolProfileBehavior": {}
+}

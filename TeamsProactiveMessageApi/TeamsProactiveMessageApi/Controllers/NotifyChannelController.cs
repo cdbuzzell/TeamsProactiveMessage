@@ -30,131 +30,145 @@ namespace TeamsProactiveMessageApi.Controllers
         //    _logger = logger;
         //}
 
-        // POST api/<NotifyChannelController>
+        // POST api/NotifyChannelController
+        // BODY: message (string)
+        // Creates a new message in the Teams channel configured in appsettings
         [HttpPost]
-        public HttpResponseMessage Post([FromBody] string message)
+        public ActionResult Post([FromBody] string message)
         {
-            // load configuration from appSettings
-            configuration = configuration ??
-                new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables()
-                    .Build();
-
-            httpClient = new HttpClient();
-
-            // get bearer token to make Teams API call
-            if (botAccessToken == null
-                    || botAccessTokenExpiration == null
-                    || DateTime.UtcNow > botAccessTokenExpiration)
+            try
             {
-                //await this.FetchTokenAsync(configuration, httpClient);
-                this.FetchTokenAsync(configuration, httpClient).Wait();
-            }
+                // load configuration from appSettings
+                configuration = configuration ??
+                    new ConfigurationBuilder()
+                        .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables()
+                        .Build();
 
-            // make call to Teams REST API to POST a NEW message to a channel
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, configuration["ConversationsUrl"]))
-            {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
+                httpClient = new HttpClient();
 
-                var payload = "{" +
-                    "\"bot\": {" +
-                         "\"id\": \"" + configuration["MicrosoftAppId"] + "\"" +
-                    "}," +
-                    "\"isGroup\": true," +
-                    "\"channelData\": {" +
-                        "\"channel\": {" +
-                            "\"id\": \"" + configuration["ChannelId"] + "\"" +
-                        "}," +
-                         "\"notification\": {" +
-                            "\"alert\": true" +
-                         "}" +
-                    "}," +
-                    "\"activity\": {" +
-                        "\"type\": \"message\"," +
-                        "\"text\": \"" + message + "\"," +
-                        "\"attachments\": []," +
-                        "\"entities\": []" +
-                    "}" +
-                  "}";
-
-                requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
-
-                using (var sendResponse = httpClient.SendAsync(requestMessage).Result)
+                // get bearer token to make Teams API call
+                if (botAccessToken == null
+                        || botAccessTokenExpiration == null
+                        || DateTime.UtcNow > botAccessTokenExpiration)
                 {
-                    if (sendResponse.StatusCode == HttpStatusCode.Created)
-                    {
-                        var jsonResponseString = sendResponse.Content.ReadAsStringAsync().Result;
-                        //dynamic resp = JsonConvert.DeserializeObject(jsonResponseString);
-                    }
-
-                    //return requestMessage.CreateResponse(sendResponse.StatusCode);
-
-                    //TODO: still need to return the conversation/message id
-                    HttpResponseMessage response = new HttpResponseMessage(sendResponse.StatusCode);
-                    //response.Content = sendResponse.Content;
-                    return response;
+                    //await this.FetchTokenAsync(configuration, httpClient);
+                    this.FetchTokenAsync(configuration, httpClient).Wait();
                 }
+
+                // make call to Teams REST API to POST a NEW message to a channel
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Post, configuration["ConversationsUrl"]))
+                {
+                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
+
+                    var payload = "{" +
+                        "\"bot\": {" +
+                             "\"id\": \"" + configuration["MicrosoftAppId"] + "\"" +
+                        "}," +
+                        "\"isGroup\": true," +
+                        "\"channelData\": {" +
+                            "\"channel\": {" +
+                                "\"id\": \"" + configuration["ChannelId"] + "\"" +
+                            "}," +
+                             "\"notification\": {" +
+                                "\"alert\": true" +
+                             "}" +
+                        "}," +
+                        "\"activity\": {" +
+                            "\"type\": \"message\"," +
+                            "\"text\": \"" + message + "\"," +
+                            "\"attachments\": []," +
+                            "\"entities\": []" +
+                        "}" +
+                      "}";
+
+                    requestMessage.Content = new StringContent(payload, Encoding.UTF8, "application/json");
+
+                    using (var sendResponse = httpClient.SendAsync(requestMessage).Result)
+                    {
+                        if (sendResponse.StatusCode == HttpStatusCode.Created)
+                        {
+                            var jsonResponseString = sendResponse.Content.ReadAsStringAsync().Result;
+                            dynamic jsonResponse = JsonConvert.DeserializeObject(jsonResponseString);
+
+                            return Created(jsonResponse.id.ToString(), jsonResponseString);
+                        }
+                        else
+                        {
+                            return StatusCode((int)sendResponse.StatusCode, sendResponse);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
             }
         }
 
-        // PUT api/<NotifyChannelController>/guid
+        // PUT api/NotifyChannel/guid
+        // PARAM: message id [19:blahblahblah@thread.blah;messageid=123456789]
+        // BODY: nothing
+        // Updates an existing message in a Teams channel
         [HttpPut("{id}")]
-        public HttpResponseMessage Put(string id, [FromBody] string message)
+        public ActionResult Put(string id, [FromBody] string message)
         {
-            // load configuration from appSettings
-            configuration = configuration ??
-                new ConfigurationBuilder()
-                    .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
-                    .AddEnvironmentVariables()
-                    .Build();
-
-            httpClient = new HttpClient();
-
-            // get bearer token to make Teams API call
-            if (botAccessToken == null
-                    || botAccessTokenExpiration == null
-                    || DateTime.UtcNow > botAccessTokenExpiration)
+            try
             {
-                this.FetchTokenAsync(configuration, httpClient).Wait();
-            }
+                // load configuration from appSettings
+                configuration = configuration ??
+                    new ConfigurationBuilder()
+                        .AddJsonFile("appsettings.Development.json", optional: true, reloadOnChange: true)
+                        .AddEnvironmentVariables()
+                        .Build();
 
-            //TODO: have them pass id AND activityid instead
-            string messageId = id.Split(";messageid=")[1];
+                httpClient = new HttpClient();
 
-            // make call to Teams REST API to UPDATE an EXISTING message in a channel
-            var updateUrl = $"{configuration["ConversationsUrl"]}/{id}/activities/{messageId}";
-
-            using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, updateUrl))
-            {
-                requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
-
-                var payloadString = "{" +
-                    "\"type\": \"message\"," +
-                    "\"text\": \"[UPDATED] :: " + message + "\"," +
-                    "\"attachments\": []," +
-                    "\"entities\": []" +
-                  "}" +
-                  "}";
-
-                requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
-
-                using (var sendResponse = httpClient.SendAsync(requestMessage).Result)
+                // get bearer token to make Teams API call
+                if (botAccessToken == null
+                        || botAccessTokenExpiration == null
+                        || DateTime.UtcNow > botAccessTokenExpiration)
                 {
-                    if (sendResponse.StatusCode == HttpStatusCode.OK)
-                    {
-                        var jsonResponseString = sendResponse.Content.ReadAsStringAsync().Result;
-                        //dynamic resp = JsonConvert.DeserializeObject(jsonResponseString);
-                    }
-
-                    //return requestMessage.CreateResponse(sendResponse.StatusCode);
-
-                    //TODO: still need to return the conversation/message id
-                    HttpResponseMessage response = new HttpResponseMessage(sendResponse.StatusCode);
-                    response.Content = sendResponse.Content;
-                    return response;
+                    this.FetchTokenAsync(configuration, httpClient).Wait();
                 }
 
+                //TODO: have them pass id AND activityid instead?
+                string messageId = id.Split(";messageid=")[1];
+
+                // make call to Teams REST API to UPDATE an EXISTING message in a channel
+                var updateUrl = $"{configuration["ConversationsUrl"]}/{id}/activities/{messageId}";
+
+                using (var requestMessage = new HttpRequestMessage(HttpMethod.Put, updateUrl))
+                {
+                    requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", botAccessToken);
+
+                    var payloadString = "{" +
+                        "\"type\": \"message\"," +
+                        "\"text\": \"[UPDATED] :: " + message + "\"," +
+                        "\"attachments\": []," +
+                        "\"entities\": []" +
+                      "}" +
+                      "}";
+
+                    requestMessage.Content = new StringContent(payloadString, Encoding.UTF8, "application/json");
+
+                    using (var sendResponse = httpClient.SendAsync(requestMessage).Result)
+                    {
+                        if (sendResponse.StatusCode == HttpStatusCode.OK)
+                        {
+                            var jsonResponseString = sendResponse.Content.ReadAsStringAsync().Result;
+                            return Ok(jsonResponseString);
+                        }
+                        else
+                        {
+                            return StatusCode((int)sendResponse.StatusCode, sendResponse);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex);
             }
         }
 
