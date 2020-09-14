@@ -30,7 +30,7 @@ namespace TeamsProactiveMessageApi.Controllers
         //    _logger = logger;
         //}
 
-        // POST api/NotifyChannelController
+        // POST api/NotifyChannel
         // BODY: message (string)
         // Creates a new message in the Teams channel configured in appsettings
         [HttpPost]
