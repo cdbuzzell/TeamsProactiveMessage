@@ -1,5 +1,7 @@
 # Teams Proactive Message
 
+This project allows one to post a simple message (string) to a channel in a team in Microsoft Teams via REST API POST. One can also update that message via REST API PUT. These messages are posted/updated using a Bot.
+
 I built this project because I couldn't find a simple example of how to [send proactive messages](https://docs.microsoft.com/en-us/microsoftteams/platform/bots/how-to/conversations/send-proactive-messages) to users/channels in Microsoft Teams. Every example either started with a user sending a message to my bot (and thus had pre-existing Teams context), or had a ton of other functionality wrapped around the proactive message. This project is meant to be the most basic implementation of proactive messages. This project is not production-ready nor a representation of how you should do this for reals.
 
 ## Prerequisites
